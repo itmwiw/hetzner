@@ -5,11 +5,11 @@ resource "hcloud_load_balancer" "api" {
 }
 
 resource "hcloud_load_balancer_target" "api_target" {
-  for_each = var.api_server_ids
+  count = length(var.api_server_ids)
   
   type             = "server"
   load_balancer_id = hcloud_load_balancer.api.id
-  server_id        = each.value
+  server_id        = var.api_server_ids[count.index]
   use_private_ip   = true
 }
   
@@ -55,11 +55,11 @@ resource "hcloud_load_balancer" "ingress" {
 }
 
 resource "hcloud_load_balancer_target" "ingress_target" {
-  for_each = var.ingress_server_ids
+  count = length(var.ingress_server_ids)
   
   type             = "server"
   load_balancer_id = hcloud_load_balancer.ingress.id
-  server_id        = each.value
+  server_id        = var.ingress_server_ids[count.index]
   use_private_ip   = true
 }
 
