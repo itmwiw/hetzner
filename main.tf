@@ -41,7 +41,7 @@ module "bootstrap" {
 module "master" {
   source          = "./node"
   role            = "master"
-  replicas        = 3
+  replicas        = var.master_replicas
   server_type     = var.master_server_type
   location        = var.location
   base_domain     = var.base_domain
@@ -54,7 +54,7 @@ module "master" {
 module "worker" {
   source          = "./node"
   role            = "worker"
-  replicas        = 1
+  replicas        = var.worker_replicas
   server_type     = var.worker_server_type
   location        = var.location
   base_domain     = var.base_domain
@@ -69,7 +69,7 @@ module "dns" {
   location           = var.location
   base_domain        = var.base_domain
   cluster_name       = var.cluster_name
-  subnet             = module.network.public_subnet_id
+  subnet             = module.network.subnet_id
   api_server_ids     = concat(module.master.server_ids, module.worker.server_ids)
   ingress_server_ids = concat(module.master.server_ids, module.worker.server_ids)
 }

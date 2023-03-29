@@ -7,7 +7,7 @@ resource "hcloud_server" "server" {
   location    = var.location
   
   public_net {
-    ipv4_enabled = false
+    ipv4_enabled = true
     ipv6_enabled = false
   }
   
@@ -73,10 +73,10 @@ resource "hcloud_rdns" "dns-ptr-ipv4" {
   dns_ptr    = element(hcloud_server.server.*.name, count.index)
 }
 
-resource "hcloud_rdns" "dns-ptr-ipv6" {
-  count      = var.replicas
-  server_id  = element(hcloud_server.server.*.id, count.index)
-  ip_address = "${element(hcloud_server.server.*.ipv6_address, count.index)}1"
-  dns_ptr    = element(hcloud_server.server.*.name, count.index)
-}
+# resource "hcloud_rdns" "dns-ptr-ipv6" {
+  # count      = var.replicas
+  # server_id  = element(hcloud_server.server.*.id, count.index)
+  # ip_address = "${element(hcloud_server.server.*.ipv6_address, count.index)}1"
+  # dns_ptr    = element(hcloud_server.server.*.name, count.index)
+# }
 
