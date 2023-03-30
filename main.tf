@@ -23,6 +23,10 @@ module "network" {
   network_cidr        = var.network_cidr
   network_zone        = var.network_zone
   cluster_name        = var.cluster_name
+  base_domain         = var.base_domain
+  location            = var.location
+  ssh_private_key     = tls_private_key.hetzner.private_key_pem
+  ssh_hcloud_key      = hcloud_ssh_key.key.id
 }
 
 module "bootstrap" {
@@ -36,6 +40,9 @@ module "bootstrap" {
   network         = module.network.virtual_network_id
   ssh_private_key = tls_private_key.hetzner.private_key_pem
   ssh_hcloud_key  = hcloud_ssh_key.key.id
+  
+  depends_on      = [module.network]
+ ]
 }
 
 module "master" {
@@ -49,6 +56,8 @@ module "master" {
   network         = module.network.virtual_network_id
   ssh_private_key = tls_private_key.hetzner.private_key_pem
   ssh_hcloud_key  = hcloud_ssh_key.key.id
+  
+  depends_on      = [module.network]
 }
 
 module "worker" {
@@ -62,6 +71,8 @@ module "worker" {
   network         = module.network.virtual_network_id
   ssh_private_key = tls_private_key.hetzner.private_key_pem
   ssh_hcloud_key  = hcloud_ssh_key.key.id
+  
+  depends_on      = [module.network]
 }
 
 module "dns" {

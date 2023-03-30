@@ -1,4 +1,18 @@
+# Networking and DNS
+
+## NAT Gateway
+sudo apt update -q
+sudo DEBIAN_FRONTEND=noninteractive apt-get -yq  upgrade
+sudo echo 1 > /proc/sys/net/ipv4/ip_forward
+sudo ip_forward="net.ipv4.ip_forward=1"; sed -i "/^#$ip_forward/ c$ip_forward" /etc/sysctl.conf
+sudo DEBIAN_FRONTEND=noninteractive apt -yq install iptables-persistent
+sudo iptables -t nat -A POSTROUTING -s '10.0.0.0/16' -o eth0 -j MASQUERADE
+sudo iptables-save
+## DNS
+sudo apt install bind9 -y
+
 # Provisioner
+
 ## Prepare Coreos-installer binary
 sudo apt-get install libzstd-dev libssl-dev
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
