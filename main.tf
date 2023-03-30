@@ -84,3 +84,10 @@ module "dns" {
   api_server_ids     = concat(module.master.server_ids, module.worker.server_ids)
   ingress_server_ids = concat(module.master.server_ids, module.worker.server_ids)
 }
+
+# Output Generated Private Key
+resource "local_file" "private_key" {
+  content         = tls_private_key.hetzner.private_key_pem
+  filename        = "artifacts/ssh/hetzner.pem"
+  file_permission = "0600"
+} 
