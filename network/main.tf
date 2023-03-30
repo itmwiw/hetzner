@@ -13,5 +13,6 @@ resource "hcloud_network_subnet" "subnet" {
 resource "hcloud_network_route" "internet" {
   network_id  = hcloud_network.network.id
   destination = "0.0.0.0/0"
-  gateway     = "10.0.0.2"
+  gateway     = hcloud_server.server.network.*.ip[0]
+  depends_on  = [hcloud_server.server]
 }

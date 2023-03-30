@@ -42,7 +42,6 @@ module "bootstrap" {
   ssh_hcloud_key  = hcloud_ssh_key.key.id
   
   depends_on      = [module.network]
- ]
 }
 
 module "master" {
