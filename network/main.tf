@@ -9,3 +9,9 @@ resource "hcloud_network_subnet" "subnet" {
   network_zone = var.network_zone
   ip_range     = local.subnet_cidr
 }
+
+resource "hcloud_network_route" "internet" {
+  network_id  = hcloud_network.network.id
+  destination = "0.0.0.0/0"
+  gateway     = "10.0.0.2"
+}
