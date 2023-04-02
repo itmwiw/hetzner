@@ -42,7 +42,7 @@ resource "null_resource" "node_config" {
       "sudo systemctl disable systemd-resolved && systemctl stop systemd-resolved",
       "rm /etc/resolv.conf",
       "sudo DEBIAN_FRONTEND=noninteractive apt -yq install dnsmasq",
-      "cat << "EOF" | sudo tee /etc/dnsmasq.conf",
+      "cat << \"EOF\" | sudo tee /etc/dnsmasq.conf",
       "listen-address=::1,127.0.0.1,${hcloud_server.server.network.*.ip[0]}",
       "server=8.8.8.8",
       "server=4.4.4.4",
