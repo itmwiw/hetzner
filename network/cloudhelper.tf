@@ -17,7 +17,9 @@ resource "hcloud_server" "server" {
   }
 
   ssh_keys = [var.ssh_hcloud_key]
-  
+}
+
+resource "null_resource" "node_config" {  
   connection {
     host = hcloud_server.server.ipv4_address
     timeout = "10m"
@@ -36,7 +38,16 @@ resource "hcloud_server" "server" {
 	  "sudo apt update -q",
       "sudo DEBIAN_FRONTEND=noninteractive apt -yq install iptables-persistent",
       "sudo iptables -t nat -A POSTROUTING -s '${var.network_cidr}' -o eth0 -j MASQUERADE",
-      "sudo iptables-save > /etc/iptables/rules.v4"
+      "sudo iptables-save > /etc/iptables/rules.v4",
+      "sudo systemctl disable systemd-resolved && systemctl stop systemd-resolved",
+      "rm /etc/resolv.conf",
+      "sudo DEBIAN_FRONTEND=noninteractive apt -yq install dnsmasq",
+      "cat << "EOF" | sudo tee /etc/dnsmasq.conf",
+      "listen-address=::1,127.0.0.1,${hcloud_server.server.network.*.ip[0]}",
+      "server=8.8.8.8",
+      "server=4.4.4.4",
+      "EOF",
+      "sudo echo nameserver 127.0.0.1 > /etc/resolv.conf"
     ]
   }
 }

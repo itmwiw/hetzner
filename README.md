@@ -9,7 +9,21 @@ sudo DEBIAN_FRONTEND=noninteractive apt -yq install iptables-persistent
 sudo iptables -t nat -A POSTROUTING -s '10.0.0.0/16' -o eth0 -j MASQUERADE
 sudo iptables-save
 ## DNS
-sudo apt install bind9 -y
+### cloudhelper
+sudo systemctl disable systemd-resolved && systemctl stop systemd-resolved
+rm /etc/resolv.conf
+sudo DEBIAN_FRONTEND=noninteractive apt -yq install dnsmasq
+cat << "EOF" | sudo tee /etc/dnsmasq.conf
+listen-address=::1,127.0.0.1,10.0.0.4
+server=8.8.8.8
+server=4.4.4.4
+EOF
+sudo echo nameserver 127.0.0.1 > /etc/resolv.conf
+append etc/hosts
+### vm-ubuntu
+ip route add default via 10.0.0.1
+sudo systemd-resolve --interface ens10 --set-dns 10.0.0.4 --set-domain yourdomain.local
+
 
 # Provisioner
 
