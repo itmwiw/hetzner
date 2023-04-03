@@ -53,16 +53,29 @@ resource "null_resource" "node_config" {
   provisioner "remote-exec" {
     inline = [
       "set -x",
-	  "ip route add default via 10.0.0.1",
+      "mkdir /network",
+      "cat << \"EOF\" > /network/ens10.nmconnection",
+      "[connection]",
+      "id=ens10",
+      "type=ethernet",
+      "autoconnect=true",
+      "interface-name=ens10",
+      "[ipv4]",
+      "dns=${var.dns_server_ip};",
+      "method=auto",
+      "[ipv6]",
+      "method=auto",
+      "EOF",
+      "chmod 600 /network/ens10.nmconnection",
       # coreos-installer binary is copied, if you have sufficient RAM available, you can also uncomment the following
       # two lines and comment-out the `chmod +x` line, to build coreos-installer in rescue mode
       # "apt install cargo",
       # "cargo install coreos-installer",
       "chmod +x /usr/local/bin/coreos-installer",
       # Download and install Fedora CoreOS to /dev/sda
-      "coreos-installer install /dev/sda -i /root/config.ign --copy-network",
+      "coreos-installer install /dev/sda -i /root/config.ign --copy-network --network-dir /network",
       # Exit rescue mode and boot into coreos
-      "reboot"
+      "shutdown"
     ]
   }
 }
