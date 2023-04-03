@@ -49,7 +49,7 @@ resource "null_resource" "node_config" {
       "server=4.4.4.4",
       "EOF",
       "sudo echo nameserver 127.0.0.1 > /etc/resolv.conf",
-	  "systemctl restart dnsmasq"
+      "sudo systemctl restart dnsmasq"
     ]
   }
 }
