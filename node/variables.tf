@@ -49,3 +49,8 @@ variable "ssh_hcloud_key" {
   type = string
 }
 
+variable "dns_server_ip" {
+  type        = string
+  description = "The dns server's private ip"
+}
+

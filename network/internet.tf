@@ -1,5 +1,5 @@
-resource "hcloud_server" "server" {
-  name = "cloudhelper.${var.cluster_name}.${var.base_domain}"
+resource "hcloud_server" "internet" {
+  name = "internet.${var.cluster_name}.${var.base_domain}"
   labels = { "os" = "coreos" }
 
   server_type = "cx21"
@@ -13,7 +13,6 @@ resource "hcloud_server" "server" {
   
   network {
     network_id = hcloud_network.network.id
-	#ip         = "10.0.0.2"
   }
 
   ssh_keys = [var.ssh_hcloud_key]

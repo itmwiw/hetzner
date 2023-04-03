@@ -40,6 +40,7 @@ module "bootstrap" {
   network         = module.network.virtual_network_id
   ssh_private_key = tls_private_key.hetzner.private_key_pem
   ssh_hcloud_key  = hcloud_ssh_key.key.id
+  dns_server_ip          = module.network.internet_gateway_ip
   
   depends_on      = [module.network]
 }
@@ -55,6 +56,7 @@ module "master" {
   network         = module.network.virtual_network_id
   ssh_private_key = tls_private_key.hetzner.private_key_pem
   ssh_hcloud_key  = hcloud_ssh_key.key.id
+  dns_server_ip          = module.network.internet_gateway_ip
   
   depends_on      = [module.network]
 }
@@ -70,6 +72,7 @@ module "worker" {
   network         = module.network.virtual_network_id
   ssh_private_key = tls_private_key.hetzner.private_key_pem
   ssh_hcloud_key  = hcloud_ssh_key.key.id
+  dns_server_ip          = module.network.internet_gateway_ip
   
   depends_on      = [module.network]
 }

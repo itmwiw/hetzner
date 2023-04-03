@@ -20,9 +20,20 @@ server=4.4.4.4
 EOF
 sudo echo nameserver 127.0.0.1 > /etc/resolv.conf
 append etc/hosts
+10.0.0.2 api-int.okd.internal.com
+10.0.0.2 api.okd.internal.com
+10.0.0.3 *.apps.okd.internal.com
+10.0.0.6 bootstrap.okd.internal.com
+10.0.0.5 master0.okd.internal.com
+10.0.0.8 master1.okd.internal.com
+10.0.0.7 master2.okd.internal.com
+
 ### vm-ubuntu
 ip route add default via 10.0.0.1
 sudo systemd-resolve --interface ens10 --set-dns 10.0.0.4 --set-domain yourdomain.local
+- persistent -
+sudo nmcli connection modify "Wired connection 1" ipv4.dns "10.0.0.4"
+sudo systemctl restart NetworkManager
 
 
 # Provisioner
@@ -47,12 +58,12 @@ sudo cp openshift-install /usr/local/bin
 ## Generate ignition files
 cat << "EOF" | sudo tee install-config.yaml
 apiVersion: v1
-baseDomain: hatred.world
+baseDomain: internal.com
 metadata:
   name: okd
 compute:
 - name: worker
-  replicas: 1
+  replicas: 0
 controlPlane:
   name: master
   replicas: 3
