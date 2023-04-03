@@ -14,5 +14,5 @@ resource "hcloud_network_route" "internet" {
   network_id  = hcloud_network.network.id
   destination = "0.0.0.0/0"
   gateway     = hcloud_server.internet.network.*.ip[0]
-  depends_on  = [hcloud_server.server]
+  depends_on  = [hcloud_server.internet]
 }
