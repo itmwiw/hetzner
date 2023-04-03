@@ -20,7 +20,7 @@ resource "hcloud_server" "internet" {
 
 resource "null_resource" "node_config" {  
   connection {
-    host = hcloud_server.server.ipv4_address
+    host = hcloud_server.internet.ipv4_address
     timeout = "10m"
     agent = false
 	private_key = var.ssh_private_key
@@ -43,7 +43,7 @@ resource "null_resource" "node_config" {
       "sudo systemctl disable systemd-resolved && systemctl stop systemd-resolved",
       "rm /etc/resolv.conf",
       "cat << \"EOF\" | sudo tee /etc/dnsmasq.conf",
-      "listen-address=::1,127.0.0.1,${hcloud_server.server.network.*.ip[0]}",
+      "listen-address=::1,127.0.0.1,${hcloud_server.internet.network.*.ip[0]}",
       "server=8.8.8.8",
       "server=4.4.4.4",
       "EOF",
