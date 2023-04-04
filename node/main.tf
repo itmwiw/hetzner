@@ -10,16 +10,18 @@ resource "hcloud_server" "server" {
     ipv4_enabled = true
     ipv6_enabled = false
   }
-  
-  network {
-    network_id = var.network
-	ip = var.role == "bootstrap" ? cidrhost(var.subnet_cidr, count.index + 100) : cidrhost(var.subnet_cidr, count.index + 1)
-  }
 
   # Image is ignored, as we boot into rescue mode, but is a required field
   image = "fedora-37"
   rescue = "linux64"
   ssh_keys = [var.ssh_hcloud_key]
+}
+
+resource "hcloud_server_network" "server" {
+  count      = var.replicas
+  server_id  = hcloud_server.server[count.index].id
+  network_id = var.network
+  ip         = var.role == "bootstrap" ? cidrhost(var.subnet_cidr, count.index + 100) : cidrhost(var.subnet_cidr, count.index + 1)
 }
 
 resource "null_resource" "node_config" {

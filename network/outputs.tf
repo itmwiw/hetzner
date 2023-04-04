@@ -10,7 +10,7 @@ output "internet_gateway_ip" {
   value = hcloud_server.internet.network.*.ip[0]
 }
 
-output "cloudhelper_public_ip" {
+output "internet_gateway_public_ip" {
   value = hcloud_server.internet.ipv4_address
 }
 

@@ -30,6 +30,7 @@ resource "null_resource" "dns_config" {
 
   provisioner "remote-exec" {
     inline = [
+	  "sudo apt update -q",
       "sudo DEBIAN_FRONTEND=noninteractive apt -yq install dnsmasq",
       "sudo systemctl disable systemd-resolved && systemctl stop systemd-resolved",
       "rm /etc/resolv.conf",

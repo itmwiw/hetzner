@@ -7,5 +7,5 @@ output "server_names" {
 }
 
 output "ip_addresses" {
-  value = hcloud_server.server[*].network[0].ip
+  value = hcloud_server_network.server.*.ip
 }
