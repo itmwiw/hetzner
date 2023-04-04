@@ -18,7 +18,7 @@ resource "hcloud_ssh_key" "key" {
   public_key = tls_private_key.hetzner.public_key_openssh
 }
 
-module "networking" {
+module "network" {
   source              = "./network"
   network_cidr        = var.network_cidr
   network_zone        = var.network_zone
@@ -37,13 +37,13 @@ module "bootstrap" {
   location        = var.location
   base_domain     = var.base_domain
   cluster_name    = var.cluster_name
-  network         = module.networking.virtual_network_id
+  network         = module.network.virtual_network_id
   ssh_private_key = tls_private_key.hetzner.private_key_pem
   ssh_hcloud_key  = hcloud_ssh_key.key.id
-  dns_server_ip   = module.networking.dns_server_ip
-  subnet_cidr     = module.networking.masters_subnet_cidr
+  dns_server_ip   = module.network.dns_server_ip
+  subnet_cidr     = module.network.masters_subnet_cidr
   
-  depends_on      = [module.networking]
+  depends_on      = [module.network]
 }
 
 module "master" {
@@ -54,13 +54,13 @@ module "master" {
   location        = var.location
   base_domain     = var.base_domain
   cluster_name    = var.cluster_name
-  network         = module.networking.virtual_network_id
+  network         = module.network.virtual_network_id
   ssh_private_key = tls_private_key.hetzner.private_key_pem
   ssh_hcloud_key  = hcloud_ssh_key.key.id
-  dns_server_ip   = module.networking.dns_server_ip
-  subnet_cidr     = module.networking.masters_subnet_cidr
+  dns_server_ip   = module.network.dns_server_ip
+  subnet_cidr     = module.network.masters_subnet_cidr
   
-  depends_on      = [module.networking]
+  depends_on      = [module.network]
 }
 
 module "worker" {
@@ -71,13 +71,13 @@ module "worker" {
   location        = var.location
   base_domain     = var.base_domain
   cluster_name    = var.cluster_name
-  network         = module.networking.virtual_network_id
+  network         = module.network.virtual_network_id
   ssh_private_key = tls_private_key.hetzner.private_key_pem
   ssh_hcloud_key  = hcloud_ssh_key.key.id
-  dns_server_ip   = module.networking.dns_server_ip
-  subnet_cidr     = module.networking.workers_subnet_cidr
+  dns_server_ip   = module.network.dns_server_ip
+  subnet_cidr     = module.network.workers_subnet_cidr
   
-  depends_on      = [module.networking]
+  depends_on      = [module.network]
 }
 
 module "dns" {
@@ -85,12 +85,12 @@ module "dns" {
   location             = var.location
   base_domain          = var.base_domain
   cluster_name         = var.cluster_name
-  subnet               = module.networking.subnet_id
+  subnet               = module.network.subnet_id
   api_server_ids       = concat(module.master.server_ids, module.bootstrap.server_ids)
   ingress_server_ids   = concat(module.master.server_ids, module.worker.server_ids)
-  dns_server_ip        = module.networking.dns_server_ip
-  api_lb_ip            = module.networking.api_lb_ip
-  ingress_lb_ip        = module.networking.ingress_lb_ip
+  dns_server_ip        = module.network.dns_server_ip
+  api_lb_ip            = module.network.api_lb_ip
+  ingress_lb_ip        = module.network.ingress_lb_ip
   masters_ip_addresses = module.master.ip_addresses
   workers_ip_addresses = module.worker.ip_addresses
 }

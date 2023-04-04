@@ -13,7 +13,7 @@ resource "hcloud_server" "server" {
   
   network {
     network_id = var.network
-	ip = var.role == "bootstrap" ? cidrhost(var.subnet_cidr, ${count.index + 100}) : cidrhost(var.subnet_cidr, ${count.index + 1})
+	ip = var.role == "bootstrap" ? cidrhost(var.subnet_cidr, count.index + 100) : cidrhost(var.subnet_cidr, count.index + 1)
   }
 
   # Image is ignored, as we boot into rescue mode, but is a required field

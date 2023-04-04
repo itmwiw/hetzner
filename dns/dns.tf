@@ -49,7 +49,7 @@ resource "null_resource" "dns_config" {
 }
 
 resource "null_resource" "dns_config_masters" {
-  count = length(var.masters_ip_addresses)}
+  count = length(var.masters_ip_addresses)
   connection {
     host = hcloud_server.dns.ipv4_address
     timeout = "1m"
@@ -59,13 +59,13 @@ resource "null_resource" "dns_config_masters" {
   }
   provisioner "remote-exec" {
     inline = [
-	  "sudo echo ${element(var.var.masters_ip_addresses, count.index))} master${count.index}.${var.cluster_name}.${var.base_domain} >> /etc/hosts"
+	  "sudo echo ${element(var.var.masters_ip_addresses, count.index)} master${count.index}.${var.cluster_name}.${var.base_domain} >> /etc/hosts"
     ]
   }
 }
 
 resource "null_resource" "dns_config_workers" {
-  count = length(var.workers_ip_addresses)}
+  count = length(var.workers_ip_addresses)
   connection {
     host = hcloud_server.dns.ipv4_address
     timeout = "1m"
@@ -75,7 +75,7 @@ resource "null_resource" "dns_config_workers" {
   }
   provisioner "remote-exec" {
     inline = [
-	  "sudo echo ${element(var.var.workers_ip_addresses, count.index))} worker${count.index}.${var.cluster_name}.${var.base_domain} >> /etc/hosts"
+	  "sudo echo ${element(var.var.workers_ip_addresses, count.index)} worker${count.index}.${var.cluster_name}.${var.base_domain} >> /etc/hosts"
     ]
   }
 }
