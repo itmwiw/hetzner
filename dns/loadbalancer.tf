@@ -14,8 +14,10 @@ resource "hcloud_load_balancer_target" "api_target" {
 }
   
 resource "hcloud_load_balancer_network" "api" {
-  load_balancer_id = hcloud_load_balancer.api.id
-  subnet_id        = var.subnet
+  load_balancer_id        = hcloud_load_balancer.api.id
+  subnet_id               = var.subnet
+  enable_public_interface = false
+  ip                      = var.api_lb_ip
 }
 
 resource "hcloud_load_balancer_service" "api" {
@@ -64,8 +66,10 @@ resource "hcloud_load_balancer_target" "ingress_target" {
 }
 
 resource "hcloud_load_balancer_network" "ingress" {
-  load_balancer_id = hcloud_load_balancer.ingress.id
-  subnet_id        = var.subnet
+  load_balancer_id        = hcloud_load_balancer.ingress.id
+  subnet_id               = var.subnet
+  enable_public_interface = false
+  ip                      = var.ingress_lb_ip
 }
 
 resource "hcloud_load_balancer_service" "ingress_http" {

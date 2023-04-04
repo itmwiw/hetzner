@@ -17,15 +17,16 @@ cat << "EOF" | sudo tee /etc/dnsmasq.conf
 listen-address=::1,127.0.0.1,10.0.0.4
 server=8.8.8.8
 server=4.4.4.4
+address=/.apps.okd.internal.com/10.0.0.2
 EOF
 sudo echo nameserver 127.0.0.1 > /etc/resolv.conf
 append etc/hosts
-10.0.0.2 api-int.okd.internal.com
-10.0.0.2 api.okd.internal.com
-10.0.0.3 *.apps.okd.internal.com
+10.0.0.3 api-int.okd.internal.com
+10.0.0.3 api.okd.internal.com
+10.0.0.2 *.apps.okd.internal.com
 10.0.0.6 bootstrap.okd.internal.com
-10.0.0.5 master0.okd.internal.com
-10.0.0.8 master1.okd.internal.com
+10.0.0.8 master0.okd.internal.com
+10.0.0.5 master1.okd.internal.com
 10.0.0.7 master2.okd.internal.com
 
 ### vm-ubuntu

@@ -13,6 +13,7 @@ resource "hcloud_server" "server" {
   
   network {
     network_id = var.network
+	ip = var.role == "bootstrap" ? cidrhost(var.subnet_cidr, ${count.index + 100}) : cidrhost(var.subnet_cidr, ${count.index + 1})
   }
 
   # Image is ignored, as we boot into rescue mode, but is a required field
@@ -80,17 +81,20 @@ resource "null_resource" "node_config" {
   }
 }
 
-resource "hcloud_rdns" "dns-ptr-ipv4" {
-  count      = var.replicas
-  server_id  = element(hcloud_server.server.*.id, count.index)
-  ip_address = element(hcloud_server.server.*.ipv4_address, count.index)
-  dns_ptr    = element(hcloud_server.server.*.name, count.index)
-}
+resource "null_resource" "dns_config" {  
+  count = var.replicas
+  connection {
+    host = hcloud_server.dns.ipv4_address
+    timeout = "2m"
+    agent = false
+	private_key = var.ssh_private_key
+    user = "root"
+  }
 
-# resource "hcloud_rdns" "dns-ptr-ipv6" {
-  # count      = var.replicas
-  # server_id  = element(hcloud_server.server.*.id, count.index)
-  # ip_address = "${element(hcloud_server.server.*.ipv6_address, count.index)}1"
-  # dns_ptr    = element(hcloud_server.server.*.name, count.index)
-# }
+  provisioner "remote-exec" {
+    inline = [
+	  "sudo echo ${hcloud_load_balancer_network.api.ip} api-int.okd.internal.com >> /etc/hosts",
+    ]
+  }
+}
 

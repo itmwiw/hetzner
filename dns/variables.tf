@@ -26,3 +26,26 @@ variable "api_server_ids" {
 variable "ingress_server_ids" {
   description = "Ingress loadbalancer's target"
 }
+
+variable "dns_server_ip" {
+  type        = string
+  description = "The dns server's private ip"
+}
+
+variable "api_lb_ip" {
+  type        = string
+  description = "The api loadbalancer's private ip"
+}
+
+variable "ingress_lb_ip" {
+  type        = string
+  description = "The ingress loadbalancer's private ip"
+}
+
+variable "masters_ip_addresses" {
+  description = "Masters' ip adresses"
+}
+
+variable "workers_ip_addresses" {
+  description = "Workers' ip adresses"
+}
