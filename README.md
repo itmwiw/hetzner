@@ -31,7 +31,7 @@ append etc/hosts
 
 ### vm-ubuntu
 ip route add default via 10.0.0.1
-sudo systemd-resolve --interface ens10 --set-dns 10.0.0.4 --set-domain yourdomain.local
+sudo systemd-resolve --interface ens10 --set-dns 10.0.0.253 --set-domain yourdomain.local
 - persistent -
 sudo nmcli connection modify "Wired connection 1" ipv4.dns "10.0.0.4"
 sudo systemctl restart NetworkManager
@@ -88,4 +88,21 @@ cp install-config.yaml ./okd
 ## Provision nodes
 mkdir terraform
 
+# Pritunl ubuntu 22.04
+sudo apt update -q
+sudo DEBIAN_FRONTEND=noninteractive apt-get -yq  upgrade
+sudo apt install wget vim curl gnupg2 software-properties-common apt-transport-https ca-certificates lsb-release
+sudo tee /etc/apt/sources.list.d/pritunl.list << EOF
+deb https://repo.pritunl.com/stable/apt jammy main
+EOF
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv 7568D9BB55FF9E5287D586017AE645C0CF8E292A
+-- Before we add the MongoDB repositories, we need to force libssl1.1 installation from the Ubuntu 21.10 repository --
+echo "deb http://security.ubuntu.com/ubuntu focal-security main" | sudo tee /etc/apt/sources.list.d/focal-security.list
+sudo apt update
+sudo apt install libssl1.1
+wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
 
+sudo apt update && sudo apt install -y pritunl mongodb-org
+sudo systemctl start pritunl mongod
+sudo systemctl enable pritunl mongod

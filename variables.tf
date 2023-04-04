@@ -22,7 +22,7 @@ variable "location" {
 variable "master_server_type" {
   description = "vServer type name, lookup via `hcloud server-type list`"
   type = string
-  default = "cx41"
+  default = "cpx41"
 }
 
 variable "worker_server_type" {
