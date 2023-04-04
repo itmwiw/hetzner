@@ -80,3 +80,19 @@ resource "null_resource" "dns_config_workers" {
     ]
   }
 }
+
+resource "null_resource" "restart_dnsmasq" {
+  count = length(var.workers_ip_addresses)
+  connection {
+    host = hcloud_server.dns.ipv4_address
+    timeout = "1m"
+    agent = false
+	private_key = var.ssh_private_key
+    user = "root"
+  }
+  provisioner "remote-exec" {
+    inline = [
+	  "sudo systemctl restart dnsmasq"
+    ]
+  }
+}

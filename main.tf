@@ -96,6 +96,8 @@ module "dns" {
   ingress_lb_ip        = module.network.ingress_lb_ip
   masters_ip_addresses = module.master.ip_addresses
   workers_ip_addresses = module.worker.ip_addresses
+  
+  depends_on      = [module.network,module.master,module.worker]
 }
 
 # Output Generated Private Key
