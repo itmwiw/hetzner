@@ -64,7 +64,7 @@ metadata:
   name: okd
 compute:
 - name: worker
-  replicas: 0
+  replicas: 3
 controlPlane:
   name: master
   replicas: 3

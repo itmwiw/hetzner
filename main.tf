@@ -85,7 +85,10 @@ module "dns" {
   location             = var.location
   base_domain          = var.base_domain
   cluster_name         = var.cluster_name
+  network              = module.network.virtual_network_id
   subnet               = module.network.subnet_id
+  ssh_private_key      = tls_private_key.hetzner.private_key_pem
+  ssh_hcloud_key       = hcloud_ssh_key.key.id
   api_server_ids       = concat(module.master.server_ids, module.bootstrap.server_ids)
   ingress_server_ids   = concat(module.master.server_ids, module.worker.server_ids)
   dns_server_ip        = module.network.dns_server_ip

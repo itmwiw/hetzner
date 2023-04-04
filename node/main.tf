@@ -81,20 +81,3 @@ resource "null_resource" "node_config" {
   }
 }
 
-resource "null_resource" "dns_config" {  
-  count = var.replicas
-  connection {
-    host = hcloud_server.dns.ipv4_address
-    timeout = "2m"
-    agent = false
-	private_key = var.ssh_private_key
-    user = "root"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-	  "sudo echo ${hcloud_load_balancer_network.api.ip} api-int.okd.internal.com >> /etc/hosts",
-    ]
-  }
-}
-

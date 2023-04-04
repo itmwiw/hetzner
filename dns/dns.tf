@@ -12,7 +12,7 @@ resource "hcloud_server" "dns" {
   }
   
   network {
-    network_id = hcloud_network.network.id
+    network_id = var.network
 	ip         = var.dns_server_ip
   }
 
@@ -59,7 +59,7 @@ resource "null_resource" "dns_config_masters" {
   }
   provisioner "remote-exec" {
     inline = [
-	  "sudo echo ${element(var.var.masters_ip_addresses, count.index)} master${count.index}.${var.cluster_name}.${var.base_domain} >> /etc/hosts"
+	  "sudo echo ${element(var.masters_ip_addresses, count.index)} master${count.index}.${var.cluster_name}.${var.base_domain} >> /etc/hosts"
     ]
   }
 }
@@ -75,7 +75,7 @@ resource "null_resource" "dns_config_workers" {
   }
   provisioner "remote-exec" {
     inline = [
-	  "sudo echo ${element(var.var.workers_ip_addresses, count.index)} worker${count.index}.${var.cluster_name}.${var.base_domain} >> /etc/hosts"
+	  "sudo echo ${element(var.workers_ip_addresses, count.index)} worker${count.index}.${var.cluster_name}.${var.base_domain} >> /etc/hosts"
     ]
   }
 }
