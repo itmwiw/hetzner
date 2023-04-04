@@ -13,7 +13,7 @@ resource "hcloud_server" "internet" {
   
   network {
     network_id = hcloud_network.network.id
-	ip = locals.internet_gateway_ip
+	ip = local.internet_gateway_ip
   }
 
   ssh_keys = [var.ssh_hcloud_key]

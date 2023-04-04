@@ -15,21 +15,21 @@ output "cloudhelper_public_ip" {
 }
 
 output "dns_server_ip" {
-  value = locals.dns_server_ip
+  value = local.dns_server_ip
 }
 
 output "api_lb_ip" {
-  value = locals.api_lb_ip
+  value = local.api_lb_ip
 }
 
 output "ingress_lb_ip" {
-  value = locals.ingress_lb_ip
+  value = local.ingress_lb_ip
 }
 
 output "masters_subnet_cidr" {
-  value = locals.masters_subnet_cidr
+  value = local.masters_subnet_cidr
 }
 
 output "workers_subnet_cidr" {
-  value = locals.workers_subnet_cidr
+  value = local.workers_subnet_cidr
 }
