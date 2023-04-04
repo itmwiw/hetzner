@@ -14,6 +14,11 @@ variable "cluster_name" {
   description = "OKD's cluster name"
 }
 
+variable "network" {
+  type        = string
+  description = "The server's network"
+}
+
 variable "subnet" {
   type        = string
   description = "Loadbalancer's subnet"
@@ -48,4 +53,15 @@ variable "masters_ip_addresses" {
 
 variable "workers_ip_addresses" {
   description = "Workers' ip adresses"
+}
+
+variable "ssh_private_key" {
+  sensitive = true
+  description = "SSH key"
+  type = string
+}
+
+variable "ssh_hcloud_key" {
+  description = "hcloud ssh key"
+  type = string
 }
