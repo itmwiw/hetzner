@@ -3,6 +3,13 @@ resource "hcloud_load_balancer" "api" {
   load_balancer_type = "lb11"
   location           = var.location
 }
+  
+resource "hcloud_load_balancer_network" "api" {
+  load_balancer_id        = hcloud_load_balancer.api.id
+  subnet_id               = var.subnet
+  enable_public_interface = false
+  ip                      = var.api_lb_ip
+}
 
 resource "hcloud_load_balancer_target" "api_target" {
   count = length(var.api_server_ids)
@@ -11,14 +18,10 @@ resource "hcloud_load_balancer_target" "api_target" {
   load_balancer_id = hcloud_load_balancer.api.id
   server_id        = var.api_server_ids[count.index]
   use_private_ip   = true
+
+  depends_on = [hcloud_load_balancer_network.api]
 }
-  
-resource "hcloud_load_balancer_network" "api" {
-  load_balancer_id        = hcloud_load_balancer.api.id
-  subnet_id               = var.subnet
-  enable_public_interface = false
-  ip                      = var.api_lb_ip
-}
+
 
 resource "hcloud_load_balancer_service" "api" {
   load_balancer_id = hcloud_load_balancer.api.id
@@ -56,6 +59,13 @@ resource "hcloud_load_balancer" "ingress" {
   location           = var.location
 }
 
+resource "hcloud_load_balancer_network" "ingress" {
+  load_balancer_id        = hcloud_load_balancer.ingress.id
+  subnet_id               = var.subnet
+  enable_public_interface = false
+  ip                      = var.ingress_lb_ip
+}
+
 resource "hcloud_load_balancer_target" "ingress_target" {
   count = length(var.ingress_server_ids)
   
@@ -63,13 +73,8 @@ resource "hcloud_load_balancer_target" "ingress_target" {
   load_balancer_id = hcloud_load_balancer.ingress.id
   server_id        = var.ingress_server_ids[count.index]
   use_private_ip   = true
-}
 
-resource "hcloud_load_balancer_network" "ingress" {
-  load_balancer_id        = hcloud_load_balancer.ingress.id
-  subnet_id               = var.subnet
-  enable_public_interface = false
-  ip                      = var.ingress_lb_ip
+  depends_on = [hcloud_load_balancer_network.ingress]
 }
 
 resource "hcloud_load_balancer_service" "ingress_http" {
