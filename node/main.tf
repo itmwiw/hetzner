@@ -1,3 +1,8 @@
+locals {
+  # The interface for the first attached network will be named ens10 (for CX, CCX*1) or enp7s0 (for CPX, CCX*2)
+  nic = startswith(var.server_type, "cpx") ? "enp7s0" : "ens10"
+}
+
 resource "hcloud_server" "server" {
   count = var.replicas
   name = "${var.role}${count.index}.${var.cluster_name}.${var.base_domain}"
@@ -57,19 +62,19 @@ resource "null_resource" "node_config" {
     inline = [
       "set -x",
       "mkdir /network",
-      "cat << \"EOF\" > /network/ens10.nmconnection",
+      "cat << \"EOF\" > /network/${local.nic}.nmconnection",
       "[connection]",
-      "id=ens10",
+      "id=${local.nic}",
       "type=ethernet",
       "autoconnect=true",
-      "interface-name=ens10",
+      "interface-name=${local.nic}",
       "[ipv4]",
       "dns=${var.dns_server_ip};",
       "method=auto",
       "[ipv6]",
       "method=auto",
       "EOF",
-      "chmod 600 /network/ens10.nmconnection",
+      "chmod 600 /network/${local.nic}.nmconnection",
       # coreos-installer binary is copied, if you have sufficient RAM available, you can also uncomment the following
       # two lines and comment-out the `chmod +x` line, to build coreos-installer in rescue mode
       # "apt install cargo",
