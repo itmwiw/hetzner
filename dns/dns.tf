@@ -30,9 +30,9 @@ resource "null_resource" "dns_config" {
 
   provisioner "remote-exec" {
     inline = [
-	  "sudo apt update -q",
-      "sudo DEBIAN_FRONTEND=noninteractive apt -yq install dnsmasq",
-      "sudo systemctl disable systemd-resolved && systemctl stop systemd-resolved",
+	  "apt update -q",
+      "DEBIAN_FRONTEND=noninteractive apt -yq install dnsmasq",
+      "systemctl disable systemd-resolved && systemctl stop systemd-resolved",
       "rm /etc/resolv.conf",
       "rm /etc/hosts",
       "cat << \"EOF\" | sudo tee /etc/dnsmasq.conf",
@@ -41,10 +41,9 @@ resource "null_resource" "dns_config" {
       "server=4.4.4.4",
       "address=/.apps.okd.internal.com/${hcloud_load_balancer_network.ingress.ip}",
       "EOF",
-      "sudo echo nameserver 127.0.0.1 > /etc/resolv.conf",
-	  "sudo echo ${hcloud_load_balancer_network.api.ip} api-int.okd.internal.com >> /etc/hosts",
-	  "sudo echo ${hcloud_load_balancer_network.api.ip} api.okd.internal.com >> /etc/hosts",
-      "sudo systemctl restart dnsmasq"
+      "echo nameserver 127.0.0.1 > /etc/resolv.conf",
+	  "echo ${hcloud_load_balancer_network.api.ip} api-int.okd.internal.com >> /etc/hosts",
+	  "echo ${hcloud_load_balancer_network.api.ip} api.okd.internal.com >> /etc/hosts"
     ]
   }
 }
@@ -63,6 +62,7 @@ resource "null_resource" "dns_config_masters" {
 	  "sudo echo ${element(var.masters_ip_addresses, count.index)} master${count.index}.${var.cluster_name}.${var.base_domain} >> /etc/hosts"
     ]
   }
+  depends_on = [null_resource.dns_config]
 }
 
 resource "null_resource" "dns_config_workers" {
@@ -79,6 +79,7 @@ resource "null_resource" "dns_config_workers" {
 	  "sudo echo ${element(var.workers_ip_addresses, count.index)} worker${count.index}.${var.cluster_name}.${var.base_domain} >> /etc/hosts"
     ]
   }
+  depends_on = [null_resource.dns_config,null_resource.dns_config_masters]
 }
 
 resource "null_resource" "restart_dnsmasq" {
@@ -95,4 +96,5 @@ resource "null_resource" "restart_dnsmasq" {
 	  "sudo systemctl restart dnsmasq"
     ]
   }
+  depends_on = [null_resource.dns_config,null_resource.dns_config_masters,null_resource.dns_config_workers]
 }

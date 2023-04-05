@@ -32,13 +32,13 @@ resource "null_resource" "internet_config" {
   provisioner "remote-exec" {
     inline = [
       "set -x",
-      "sudo echo 1 > /proc/sys/net/ipv4/ip_forward",
+      "echo 1 > /proc/sys/net/ipv4/ip_forward",
       "ip_forward='net.ipv4.ip_forward=1'",
       "sed -i \"/^#$ip_forward/ c$ip_forward\" /etc/sysctl.conf",
-	  "sudo apt update -q",
-      "sudo DEBIAN_FRONTEND=noninteractive apt -yq install iptables-persistent",
-      "sudo iptables -t nat -A POSTROUTING -s '${var.network_cidr}' -o eth0 -j MASQUERADE",
-      "sudo iptables-save > /etc/iptables/rules.v4",
+	  "apt update -q",
+      "DEBIAN_FRONTEND=noninteractive apt -yq install iptables-persistent",
+      "iptables -t nat -A POSTROUTING -s '${var.network_cidr}' -o eth0 -j MASQUERADE",
+      "iptables-save > /etc/iptables/rules.v4",
     ]
   }
 }
