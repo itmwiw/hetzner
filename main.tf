@@ -58,7 +58,7 @@ module "bootstrap" {
   ssh_private_key = tls_private_key.hetzner.private_key_pem
   ssh_hcloud_key  = hcloud_ssh_key.key.id
   dns_server_ip   = module.network.dns_server_ip
-  provisioner_ip  = module.network.provisioner_ip
+  provisioner_ip  = module.provisioner.public_ip_address
   subnet_cidr     = module.network.masters_subnet_cidr
   
   depends_on      = [module.network,module.provisioner]
@@ -76,7 +76,7 @@ module "master" {
   ssh_private_key = tls_private_key.hetzner.private_key_pem
   ssh_hcloud_key  = hcloud_ssh_key.key.id
   dns_server_ip   = module.network.dns_server_ip
-  provisioner_ip  = module.network.provisioner_ip
+  provisioner_ip  = module.provisioner.public_ip_address
   subnet_cidr     = module.network.masters_subnet_cidr
   
   depends_on      = [module.network,module.provisioner]
@@ -94,7 +94,7 @@ module "worker" {
   ssh_private_key = tls_private_key.hetzner.private_key_pem
   ssh_hcloud_key  = hcloud_ssh_key.key.id
   dns_server_ip   = module.network.dns_server_ip
-  provisioner_ip  = module.network.provisioner_ip
+  provisioner_ip  = module.provisioner.public_ip_address
   subnet_cidr     = module.network.workers_subnet_cidr
   
   depends_on      = [module.network,module.provisioner]

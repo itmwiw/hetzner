@@ -74,19 +74,7 @@ resource "hcloud_server" "provisioner" {
       "cp install-config.yaml ./${var.cluster_name}",
       "./openshift-install create manifests --dir=${var.cluster_name}/",
       "./openshift-install create ignition-configs --dir=${var.cluster_name}/",
-	  
-	  ## Install Apache2
-      "apt update -y",
-      "apt install -y apache2",
-      "sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf",
-      "systemctl restart apache2",
-	  
-      ## copy ignition files to apache ##
-      "mkdir /var/www/html/ignition",
-      "cp -R ${var.cluster_name}/*.ign /var/www/html/ignition/",
-      "chown -R www-data: /var/www/html/",
-      "chmod -R 755 /var/www/html/",
-	  
+
       ## Install hcloud ##
       "wget https://github.com/hetznercloud/cli/releases/download/v1.32.0/hcloud-linux-amd64.tar.gz",
       "tar -xvf hcloud-linux-amd64.tar.gz",

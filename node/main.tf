@@ -10,7 +10,8 @@ resource "hcloud_server" "server" {
 
   server_type = var.server_type
   location    = var.location
-  
+
+  # Rescue mode only works with public ip  
   public_net {
     ipv4_enabled = true
     ipv6_enabled = false
@@ -45,6 +46,12 @@ resource "null_resource" "node_config" {
     user = "root"
   }
 
+  # Private key is needed to get ignition file from provisioner server
+  provisioner "file" {
+    content = var.ssh_private_key
+    destination = "/root/hetzner.pem"
+  }
+  
   # Install Fedora CoreOS in rescue mode
   provisioner "remote-exec" {
     inline = [
@@ -74,9 +81,13 @@ resource "null_resource" "node_config" {
       "./cargo.sh -y",
       "source \"$HOME/.cargo/env\"",
       "cargo install --target-dir . coreos-installer",
+
+      ## Get ignition file ##
+      "chmod 400 hetzner.pem",
+      "scp -o StrictHostKeyChecking=no -i hetzner.pem root@${var.provisioner_ip}:/root/${var.cluster_name}/${var.role}.ign .",
 	  
 	  ## Install coreos
-      "coreos-installer install /dev/sda --ignition-url http://${var.provisioner_ip}:8080/ignition/${var.role}.ign --insecure-ignition --copy-network --network-dir /network",
+      "coreos-installer install /dev/sda -i ./${var.role}.ign --copy-network --network-dir /network",
 	  
       ## Exit rescue mode and shutdown ##
       "shutdown"
