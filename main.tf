@@ -145,7 +145,7 @@ resource "null_resource" "delete_public_ips" {
       "#!/bin/bash",
       "set -x",
 	  "server_id=$(hcloud server list | grep ${local.to_delete_ips[count.index]} | awk '{print $1;}')",
-      "hcloud server poweroff $server_id",
+      "sleep 60",
 	  "hcloud primary-ip delete $(hcloud primary-ip list | grep ${local.to_delete_ips[count.index]} | awk '{print $1;}')",
 	  "sleep 60",
       "hcloud server poweron $server_id"
