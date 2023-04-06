@@ -4,6 +4,7 @@ locals {
   dns_server_ip = cidrhost(local.subnet_cidr, 253)
   api_lb_ip = cidrhost(local.subnet_cidr, 2)
   ingress_lb_ip = cidrhost(local.subnet_cidr, 3)
+  provisioner_ip = cidrhost(local.subnet_cidr, 4)
   masters_subnet_cidr = cidrsubnet(var.network_cidr, 3, 1)
   workers_subnet_cidr = cidrsubnet(var.network_cidr, 3, 2)
 }

@@ -54,6 +54,11 @@ variable "dns_server_ip" {
   description = "The dns server's private ip"
 }
 
+variable "provisioner_ip" {
+  type        = string
+  description = "The provisioner server's private ip"
+}
+
 variable "subnet_cidr" {
   type        = string
   description = "The nodes' subnet"

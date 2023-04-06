@@ -1,0 +1,124 @@
+data "hcloud_ssh_key" "key" {
+  id = hcloud_ssh_key.key.id
+}
+
+resource "hcloud_server" "provisioner" {
+  name = "provisioner.${var.cluster_name}.${var.base_domain}"
+  labels = { "os" = "ubuntu" }
+
+  location    = var.location
+
+  network {
+    network_id = hcloud_network.network.id
+    ip         = local.provisioner_ip
+  }	
+ 
+  public_net {
+    ipv4_enabled = true
+    ipv6_enabled = false
+  }
+
+  server_type = "cx21"
+  image = "ubuntu-22.04"
+  ssh_keys = [var.ssh_hcloud_key]
+  
+  connection {
+    host = hcloud_server.provisioner.ipv4_address
+    timeout = "5m"
+    agent = false
+	private_key = var.ssh_private_key
+    user = "root"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "#!/bin/bash",
+      "set -x",
+	  
+	  ## Install oc and openshift-install ##
+      "wget https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz",
+      "tar xvf oc.tar.gz",
+      "sudo mv oc /usr/local/bin",
+      "sudo mv kubectl /usr/local/bin",
+      "oc adm release extract --command=openshift-install --to ./ quay.io/openshift/okd:4.12.0-0.okd-2023-03-18-084815",
+      "sudo cp openshift-install /usr/local/bin",
+	  
+	  ## Prepare install-config.yaml ##
+      "cat << \"EOF\" | sudo tee install-config.yaml",
+      "apiVersion: v1",
+      "baseDomain: ${var.base_domain}",
+      "metadata:",
+      "  name: ${var.cluster_name}",
+      "compute:",
+      "- name: worker",
+      "  replicas: ${worker_replicas}",
+      "controlPlane:",
+      "  name: master",
+      "  replicas: ${master_replicas}",
+      "networking:",
+      "  clusterNetwork:",
+      "  - cidr: 10.140.0.0/14",
+      "    hostPrefix: 23",
+      "  networkType: OVNKubernetes",
+      "  serviceNetwork:",
+      "  - 172.40.0.0/16",
+      "platform:",
+      "  none: {}",
+      "fips: false",
+      "pullSecret: '{\"auths\":{\"fake\":{\"auth\":\"aWQ6cGFzcwo=\"}}}'",
+      "sshKey: '${data.hcloud_ssh_key.key.public_key}'",
+      "EOF",
+	  
+	  ## Generate ignition files
+      "mkdir ${var.cluster_name}",
+      "cp install-config.yaml ./${var.cluster_name}",
+      "./openshift-install create manifests --dir=${var.cluster_name}/",
+      "./openshift-install create ignition-configs --dir=${var.cluster_name}/",
+	  
+	  ## Install Apache2
+      "apt update -y",
+      "apt install -y apache2",
+      "sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf",
+      "systemctl restart apache2",
+	  
+      ## copy ignition files to apache ##
+      "mkdir /var/www/html/ignition",
+      "cp -R ${var.cluster_name}/*.ign /var/www/html/ignition/",
+      "chown -R www-data: /var/www/html/",
+      "chmod -R 755 /var/www/html/",
+	  
+      ## Install hcloud ##
+      "wget https://github.com/hetznercloud/cli/releases/download/v1.32.0/hcloud-linux-amd64.tar.gz",
+      "tar -xvf hcloud-linux-amd64.tar.gz",
+      "mv hcloud /usr/local/bin",
+	  
+	  ## generate hcloud cli.toml file ##
+      "mkdir -p ~/.config/hcloud/",
+      "cat <<EOF > ~/.config/hcloud/cli.toml",
+      "active_context = 'hetzner'",
+      "[[contexts]]",
+      "name = 'hetzner'",
+      "token = '${var.hcloud_token}'",
+      "EOF"
+    ]
+  }
+}
+
+resource "hcloud_firewall" "provisioner" {
+  name = "provisioner.${var.cluster_name}.${var.base_domain}"
+  rule {
+    direction = "in"
+    protocol  = "tcp"
+    port      = "22"
+    source_ips = [
+      "0.0.0.0/0",
+      "::/0"
+    ]
+  }
+}
+
+resource "hcloud_firewall_attachment" "provisioner" {
+    firewall_id = hcloud_firewall.provisioner.id
+    server_ids  = [hcloud_server.provisioner.id]
+	depends_on  = [hcloud_server.provisioner]
+}

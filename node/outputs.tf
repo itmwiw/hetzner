@@ -9,3 +9,7 @@ output "server_names" {
 output "ip_addresses" {
   value = hcloud_server_network.server.*.ip
 }
+
+output "public_ip_addresses" {
+  value = hcloud_server.server.*.ipv4_address
+}

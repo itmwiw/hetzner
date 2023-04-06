@@ -98,3 +98,13 @@ resource "null_resource" "restart_dnsmasq" {
   }
   depends_on = [null_resource.dns_config,null_resource.dns_config_masters,null_resource.dns_config_workers]
 }
+
+resource "hcloud_firewall" "dns" {
+  name = "dns.${var.cluster_name}.${var.base_domain}"
+}
+
+resource "hcloud_firewall_attachment" "dns" {
+    firewall_id = hcloud_firewall.dns.id
+    server_ids  = [hcloud_server.dns.id]
+	depends_on  = [null_resource.restart_dnsmasq]
+}

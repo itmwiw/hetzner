@@ -38,29 +38,20 @@ resource "null_resource" "node_config" {
 
   connection {
     host = hcloud_server.server[count.index].ipv4_address
-    timeout = "10m"
+    timeout = "15m"
     agent = false
 	private_key = var.ssh_private_key
     # Root is the available user in rescue mode
     user = "root"
   }
 
-  # Copy config.ign
-  provisioner "file" {
-    source = "../${var.cluster_name}/${var.role}.ign"
-    destination = "/root/config.ign"
-  }
-
-  # Copy coreos-installer binary, as initramfs has not sufficient space to compile it in rescue mode
-  provisioner "file" {
-    source = "../coreos-installer"
-    destination = "/usr/local/bin/coreos-installer"
-  }
-
   # Install Fedora CoreOS in rescue mode
   provisioner "remote-exec" {
     inline = [
+      "#!/bin/bash",
       "set -x",
+	  
+	  ## configure dns ##
       "mkdir /network",
       "cat << \"EOF\" > /network/${local.nic}.nmconnection",
       "[connection]",
@@ -75,14 +66,19 @@ resource "null_resource" "node_config" {
       "method=auto",
       "EOF",
       "chmod 600 /network/${local.nic}.nmconnection",
-      # coreos-installer binary is copied, if you have sufficient RAM available, you can also uncomment the following
-      # two lines and comment-out the `chmod +x` line, to build coreos-installer in rescue mode
-      # "apt install cargo",
-      # "cargo install coreos-installer",
-      "chmod +x /usr/local/bin/coreos-installer",
-      # Download and install Fedora CoreOS to /dev/sda
-      "coreos-installer install /dev/sda -i /root/config.ign --copy-network --network-dir /network",
-      # Exit rescue mode and boot into coreos
+	  
+	  ## Build coreos-installer binary ##
+      "apt-get -y install libzstd-dev libssl-dev pkg-config",
+      "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > cargo.sh",
+      "chmod +x cargo.sh",
+      "./cargo.sh -y",
+      "source \"$HOME/.cargo/env\"",
+      "cargo install --target-dir . coreos-installer",
+	  
+	  ## Install coreos
+      "coreos-installer install /dev/sda --ignition-url http://${var.provisioner_ip}:8080/ignition/${var.role}.ign --insecure-ignition --copy-network --network-dir /network",
+	  
+      ## Exit rescue mode and shutdown ##
       "shutdown"
     ]
   }

@@ -1,5 +1,5 @@
 resource "hcloud_network" "network" {
-  name     = "vnet-${var.cluster_name}"
+  name     = "vnet.${var.cluster_name}.${var.base_domain}"
   ip_range = var.network_cidr
 }
 

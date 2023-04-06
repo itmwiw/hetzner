@@ -40,10 +40,11 @@ sudo systemctl restart NetworkManager
 # Provisioner
 
 ## Prepare Coreos-installer binary
-sudo apt-get install libzstd-dev libssl-dev
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+apt-get -y install libzstd-dev libssl-dev pkg-config
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > cargo.sh
+chmod +x cargo.sh
+./cargo.sh -y
 source "$HOME/.cargo/env"
-apt install cargo
 cargo install --target-dir . coreos-installer
 ## Hetzner public ssh key
 cat << "EOF" | sudo tee ssh_public_key
@@ -87,6 +88,19 @@ cp install-config.yaml ./okd
 ./openshift-install create ignition-configs --dir=okd/
 ## Provision nodes
 mkdir terraform
+### install hcloud
+wget https://github.com/hetznercloud/cli/releases/download/v1.32.0/hcloud-linux-amd64.tar.gz
+tar -xvf hcloud-linux-amd64.tar.gz
+sudo mv hcloud /usr/local/bin
+### install apache
+sudo apt update -y
+sudo apt install -y apache2
+sudo sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf
+#sudo ufw app list
+#sudo ufw allow 'Apache'
+sudo ufw allow 8080
+sudo ufw status
+sudo systemctl restart apache2
 
 # Pritunl ubuntu 22.04
 sudo apt update -q
@@ -103,6 +117,7 @@ sudo apt install libssl1.1
 wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
 
-sudo apt update && sudo apt install -y pritunl mongodb-org
+sudo apt update -q 
+sudo apt install -y pritunl mongodb-org
 sudo systemctl start pritunl mongod
 sudo systemctl enable pritunl mongod

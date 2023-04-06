@@ -26,6 +26,10 @@ output "ingress_lb_ip" {
   value = local.ingress_lb_ip
 }
 
+output "provisioner_ip" {
+  value = local.provisioner_ip
+}
+
 output "masters_subnet_cidr" {
   value = local.masters_subnet_cidr
 }
