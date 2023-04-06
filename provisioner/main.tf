@@ -1,5 +1,5 @@
 data "hcloud_ssh_key" "key" {
-  id = hcloud_ssh_key.key.id
+  id = var.ssh_hcloud_key
 }
 
 resource "hcloud_server" "provisioner" {
@@ -9,8 +9,8 @@ resource "hcloud_server" "provisioner" {
   location    = var.location
 
   network {
-    network_id = hcloud_network.network.id
-    ip         = local.provisioner_ip
+    network_id = var.network
+    ip         = var.provisioner_ip
   }	
  
   public_net {

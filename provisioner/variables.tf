@@ -24,11 +24,6 @@ variable "network" {
   description = "The server's network"
 }
 
-variable "subnet_cidr" {
-  type        = string
-  description = "The nodes' subnet"
-}
-
 variable "dns_server_ip" {
   type        = string
   description = "The dns server's private ip"
