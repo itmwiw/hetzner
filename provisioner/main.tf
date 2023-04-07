@@ -41,7 +41,8 @@ resource "hcloud_server" "provisioner" {
       "sudo mv oc /usr/local/bin",
       "sudo mv kubectl /usr/local/bin",
       "oc adm release extract --command=openshift-install --to ./ quay.io/openshift/okd:4.12.0-0.okd-2023-03-18-084815",
-      "sudo cp openshift-install /usr/local/bin",
+      "sudo mv openshift-install /usr/local/bin",
+      "rm oc.tar.gz",
 	  
 	  ## Prepare install-config.yaml ##
       "cat << \"EOF\" | sudo tee install-config.yaml",
@@ -80,15 +81,20 @@ resource "hcloud_server" "provisioner" {
       "wget https://github.com/hetznercloud/cli/releases/download/v1.32.0/hcloud-linux-amd64.tar.gz",
       "tar -xvf hcloud-linux-amd64.tar.gz",
       "mv hcloud /usr/local/bin",
+      "rm hcloud-linux-amd64.tar.gz",
 	  
-	  ## generate hcloud cli.toml file ##
+	  ## Generate hcloud cli.toml file ##
       "mkdir -p ~/.config/hcloud/",
       "cat <<EOF > ~/.config/hcloud/cli.toml",
       "active_context = 'hetzner'",
       "[[contexts]]",
       "name = 'hetzner'",
       "token = '${var.hcloud_token}'",
-      "EOF"
+      "EOF",
+
+      ## configure DNS
+      "echo DNS=${var.dns_server_ip} >> /etc/systemd/resolved.conf",
+      "systemctl restart systemd-resolved"
     ]
   }
 }

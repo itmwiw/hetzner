@@ -35,6 +35,9 @@ sudo systemd-resolve --interface ens10 --set-dns 10.0.0.253 --set-domain yourdom
 - persistent -
 sudo nmcli connection modify "Wired connection 1" ipv4.dns "10.0.0.4"
 sudo systemctl restart NetworkManager
+- ubuntu -
+echo DNS=10.0.0.253 >> /etc/systemd/resolved.conf
+systemctl restart systemd-resolved
 
 
 # Provisioner
