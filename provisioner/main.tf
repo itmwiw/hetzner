@@ -59,6 +59,7 @@ resource "hcloud_server" "provisioner" {
       "  clusterNetwork:",
       "  - cidr: 10.140.0.0/14",
       "    hostPrefix: 23",
+	  # to do: try to fix OVN
       "  networkType: OpenShiftSDN",
       "  serviceNetwork:",
       "  - 172.40.0.0/16",
