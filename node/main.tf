@@ -19,7 +19,7 @@ resource "hcloud_server" "server" {
 
   server_type = var.server_type
   location    = var.location
-  placement_group_id = hcloud_placement_group.server.id
+  placement_group_id = hcloud_placement_group.server.id[0]
 
   # Rescue mode only works with public ip  
   public_net {
