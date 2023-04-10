@@ -3,6 +3,15 @@ locals {
   nic = startswith(var.server_type, "cpx") ? "enp7s0" : "ens10"
 }
 
+resource "hcloud_placement_group" "server" {
+  count = var.role == "bootstrap" ? 0 : 1
+  name = "${var.role}${count.index}.${var.cluster_name}.${var.base_domain}"
+  type = "spread"
+  labels = {
+    role = "${var.role}"
+  }
+}
+
 resource "hcloud_server" "server" {
   count = var.replicas
   name = "${var.role}${count.index}.${var.cluster_name}.${var.base_domain}"
@@ -10,6 +19,7 @@ resource "hcloud_server" "server" {
 
   server_type = var.server_type
   location    = var.location
+  placement_group_id = hcloud_placement_group.server.id
 
   # Rescue mode only works with public ip  
   public_net {
