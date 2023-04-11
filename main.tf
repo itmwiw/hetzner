@@ -14,7 +14,7 @@ resource "tls_private_key" "hetzner" {
 }
 
 resource "hcloud_ssh_key" "key" {
-  name = "hcloud_ssh_key"
+  name = "${var.cluster_name}@${var.base_domain}"
   public_key = tls_private_key.hetzner.public_key_openssh
 }
 

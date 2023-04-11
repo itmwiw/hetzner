@@ -5,7 +5,7 @@ locals {
 
 resource "hcloud_placement_group" "server" {
   count = var.role == "bootstrap" ? 0 : 1
-  name = "${var.role}${count.index}.${var.cluster_name}.${var.base_domain}"
+  name = "${var.role}.${var.cluster_name}.${var.base_domain}"
   type = "spread"
   labels = {
     role = "${var.role}"
@@ -19,7 +19,7 @@ resource "hcloud_server" "server" {
 
   server_type = var.server_type
   location    = var.location
-  placement_group_id = hcloud_placement_group.server.id[0]
+  placement_group_id = var.role == "bootstrap" ? null : hcloud_placement_group.server.0.id
 
   # Rescue mode only works with public ip  
   public_net {
