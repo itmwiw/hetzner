@@ -124,3 +124,91 @@ sudo apt update -q
 sudo apt install -y pritunl mongodb-org
 sudo systemctl start pritunl mongod
 sudo systemctl enable pritunl mongod
+
+# Cilium + hccm
+cat << "EOF" | sudo tee install-config.yaml
+apiVersion: v1
+baseDomain: internal.com
+metadata:
+  name: okd
+compute:
+- name: worker
+  replicas: 3
+  metadata:
+    labels:
+      cloud-provider: hccm
+controlPlane:
+  name: master
+  replicas: 3
+  metadata:
+    labels:
+      cloud-provider: hccm
+networking:
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  machineNetwork:
+  - cidr: 10.0.0.0/16
+  networkType: Cilium
+  serviceNetwork:
+  - 172.30.0.0/16
+platform:
+  none: {}
+fips: false
+pullSecret: '{"auths":{"fake":{"auth":"aWQ6cGFzcwo="}}}'
+sshKey: 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC/dWjs+ZIdD3glfevXkLs9dqnp/i7xGi5kXytrbHzZb tarik.haddouchi@advatys.com'
+EOF
+mkdir okd
+cp install-config.yaml ./okd
+openshift-install create manifests --dir=okd/
+
+cilium_version='1.13.1'
+git_dir='/tmp/cilium-olm'
+CLUSTER_NAME=okd
+git clone https://github.com/isovalent/cilium-olm.git $git_dir
+cp $git_dir/manifests/cilium.v$cilium_version/* ${CLUSTER_NAME}/manifests
+test -d $git_dir && rm -rf -- $git_dir
+sed -i 's|image:\ registry.connect.redhat.com/isovalent/|image:\ quay.io/cilium/|g' \
+  ${CLUSTER_NAME}/manifests/cluster-network-06-cilium-00002-cilium-olm-deployment.yaml \
+  ${CLUSTER_NAME}/manifests/cluster-network-06-cilium-00014-cilium.*-clusterserviceversion.yaml
+  
+cat << 'EOF' > ${CLUSTER_NAME}/openshift/99_cloudprovider_external.yaml
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: cloudprovider-external
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+      cloud-provider: hccm
+  kubeletConfig:
+    cloudProvider: external
+EOF
+cat << 'EOF' > ${CLUSTER_NAME}/manifests/ccm-00-namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/node-selector: ""
+  labels:
+    name: hcloud-cloud-controller-manager
+    openshift.io/cluster-logging: "true"
+    openshift.io/cluster-monitoring: "true"
+    openshift.io/run-level: "0"
+  name: hcloud-cloud-controller-manager
+EOF
+cat << 'EOF' > ${CLUSTER_NAME}/manifests/ccm-01-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hcloud
+  namespace: hcloud-cloud-controller-manager
+stringData:
+  token: ${var.hcloud_token}
+EOF
+wget https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/latest/download/ccm.yaml -O okd/manifests/ccm-02-deployment.yaml
+sed -i 's|namespace:\ kube-system|namespace:\ hcloud-cloud-controller-manager|g' okd/manifests/ccm-02-deployment.yaml
+
+
+
+./openshift-install create ignition-configs --dir=okd/

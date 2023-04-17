@@ -39,11 +39,11 @@ resource "null_resource" "dns_config" {
       "listen-address=::1,127.0.0.1,${hcloud_server.dns.network.*.ip[0]}",
       "server=8.8.8.8",
       "server=4.4.4.4",
-      "address=/.apps.okd.internal.com/${hcloud_load_balancer_network.ingress.ip}",
+      "address=/.apps.${var.cluster_name}.${var.base_domain}/${hcloud_load_balancer_network.ingress.ip}",
       "EOF",
       "echo nameserver 127.0.0.1 > /etc/resolv.conf",
-	  "echo ${hcloud_load_balancer_network.api.ip} api-int.okd.internal.com >> /etc/hosts",
-	  "echo ${hcloud_load_balancer_network.api.ip} api.okd.internal.com >> /etc/hosts"
+	  "echo ${hcloud_load_balancer_network.api.ip} api-int.${var.cluster_name}.${var.base_domain} >> /etc/hosts",
+	  "echo ${hcloud_load_balancer_network.api.ip} api.${var.cluster_name}.${var.base_domain} >> /etc/hosts"
     ]
   }
 }

@@ -120,13 +120,6 @@ module "dns" {
   depends_on      = [module.network,module.master,module.worker]
 }
 
-# Output Generated Private Key
-resource "local_file" "private_key" {
-  content         = tls_private_key.hetzner.private_key_pem
-  filename        = "artifacts/ssh/hetzner.pem"
-  file_permission = "0600"
-} 
-
 locals {
   to_delete_ips = concat(module.bootstrap.public_ip_addresses,module.master.public_ip_addresses, module.worker.public_ip_addresses)
 }
@@ -155,3 +148,9 @@ resource "null_resource" "delete_public_ips" {
   depends_on = [module.network,module.master,module.worker,module.dns]
 }
 
+# Output Generated Private Key
+resource "local_file" "private_key" {
+  content         = tls_private_key.hetzner.private_key_pem
+  filename        = "artifacts/ssh/hetzner.pem"
+  file_permission = "0600"
+} 

@@ -50,6 +50,8 @@ resource "hcloud_server" "provisioner" {
       "baseDomain: ${var.base_domain}",
       "metadata:",
       "  name: ${var.cluster_name}",
+      "  labels:",
+      "    cloud-provider: hccm",
       "compute:",
       "- name: worker",
       "  replicas: ${var.worker_replicas}",
@@ -58,12 +60,14 @@ resource "hcloud_server" "provisioner" {
       "  replicas: ${var.master_replicas}",
       "networking:",
       "  clusterNetwork:",
-      "  - cidr: 10.140.0.0/14",
+      "  - cidr: 10.128.0.0/14",
       "    hostPrefix: 23",
-	  # to do: try to fix OVN
+      "  machineNetwork:",
+	  # to do: use variable for machineNetwork
+      "  - cidr: 10.0.0.0/16",
       "  networkType: OpenShiftSDN",
       "  serviceNetwork:",
-      "  - 172.40.0.0/16",
+      "  - 172.30.0.0/16",
       "platform:",
       "  none: {}",
       "fips: false",
@@ -71,11 +75,23 @@ resource "hcloud_server" "provisioner" {
       "sshKey: '${data.hcloud_ssh_key.key.public_key}'",
       "EOF",
 	  
-	  ## Generate ignition files
+	  ## Generate manifests ##
       "mkdir ${var.cluster_name}",
       "cp install-config.yaml ./${var.cluster_name}",
-      "./openshift-install create manifests --dir=${var.cluster_name}/",
-      "./openshift-install create ignition-configs --dir=${var.cluster_name}/",
+      "openshift-install create manifests --dir=${var.cluster_name}/",
+	  
+	  ## configure Cilium CNI"
+      # "cilium_version='1.13.0'",
+      # "git_dir='/tmp/cilium-olm'",
+      # "git clone https://github.com/cilium/cilium-olm.git $git_dir",
+      # "cp $git_dir/manifests/cilium.v$cilium_version/* ${var.cluster_name}/manifests",
+      # "test -d $git_dir && rm -rf -- $git_dir",
+      # "sed -i 's|image:\\ registry.connect.redhat.com/isovalent/|image:\\ quay.io/cilium/|g' \\",
+      # "  ${var.cluster_name}/manifests/cluster-network-06-cilium-00002-cilium-olm-deployment.yaml \\",
+      # "  ${var.cluster_name}/manifests/cluster-network-06-cilium-00014-cilium.*-clusterserviceversion.yaml",
+	  
+	  ## Generate ignition files
+      "openshift-install create ignition-configs --dir=${var.cluster_name}/",
 
       ## Install hcloud ##
       "wget https://github.com/hetznercloud/cli/releases/download/v1.32.0/hcloud-linux-amd64.tar.gz",
