@@ -32,6 +32,7 @@ append etc/hosts
 ### vm-ubuntu
 ip route add default via 10.0.0.1
 sudo systemd-resolve --interface ens10 --set-dns 10.0.0.253 --set-domain yourdomain.local
+or resolvectl ...
 - persistent -
 sudo nmcli connection modify "Wired connection 1" ipv4.dns "10.0.0.4"
 sudo systemctl restart NetworkManager
@@ -162,13 +163,13 @@ mkdir okd
 cp install-config.yaml ./okd
 openshift-install create manifests --dir=okd/
 
-cilium_version='1.13.1'
+cilium_version='1.13.0'
 git_dir='/tmp/cilium-olm'
 CLUSTER_NAME=okd
-git clone https://github.com/isovalent/cilium-olm.git $git_dir
+git clone https://github.com/cilium/cilium-olm.git $git_dir
 cp $git_dir/manifests/cilium.v$cilium_version/* ${CLUSTER_NAME}/manifests
 test -d $git_dir && rm -rf -- $git_dir
-sed -i 's|image:\ registry.connect.redhat.com/isovalent/|image:\ quay.io/cilium/|g' \
+sed -i 's|image:\ registry.connect.redhat.com/isovalent/cilium-olm@sha256:aed05a332413c8244b615d6b2f013e4fbc5ce7f65ed7f83213bc3605ae4dedce|image:\ quay.io/cilium/cilium-olm@sha256:78c47222700d2a552972d5a46e5b0297dec166e236e880190aab69f90df62979|g' \
   ${CLUSTER_NAME}/manifests/cluster-network-06-cilium-00002-cilium-olm-deployment.yaml \
   ${CLUSTER_NAME}/manifests/cluster-network-06-cilium-00014-cilium.*-clusterserviceversion.yaml
   
