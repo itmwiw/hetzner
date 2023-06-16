@@ -126,6 +126,9 @@ sudo apt install -y pritunl mongodb-org
 sudo systemctl start pritunl mongod
 sudo systemctl enable pritunl mongod
 
+-dns: 10.0.0.253
+-add route: 10.0.0.0/16 
+
 # Cilium + hccm
 cat << "EOF" | sudo tee install-config.yaml
 apiVersion: v1
@@ -213,3 +216,10 @@ sed -i 's|namespace:\ kube-system|namespace:\ hcloud-cloud-controller-manager|g'
 
 
 ./openshift-install create ignition-configs --dir=okd/
+
+# known issues
+## mcp is degraded:
+ssh to node and clear the journal logs that are causing an issue, for example
+journalctl --verify
+sudo journalctl --vacuum-time=30min
+journalctl --verify
