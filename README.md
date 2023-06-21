@@ -223,3 +223,6 @@ ssh to node and clear the journal logs that are causing an issue, for example
 journalctl --verify
 sudo journalctl --vacuum-time=30min
 journalctl --verify
+
+# to do:
+document more explicitly post-installation
